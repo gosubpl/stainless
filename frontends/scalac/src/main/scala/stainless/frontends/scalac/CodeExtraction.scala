@@ -171,10 +171,12 @@ trait CodeExtraction extends ASTExtractors {
       case EmptyTree =>
         // ignore
 
-      case t if (
-        (annotationsOf(t.symbol) contains xt.Ignore) ||
-        (t.symbol.isSynthetic && !t.symbol.isImplicit)
-      ) =>
+      case t if (annotationsOf(t.symbol) contains xt.Ignore) =>
+        val source = t.symbol.pos.source.file.file.getAbsolutePath
+        if (!(Main.libraryFiles contains source))
+          outOfSubsetError(t, s"@ignore is for internal usage only; error detected on: " + t.symbol.fullName)
+
+      case t if t.symbol.isSynthetic && !t.symbol.isImplicit =>
         // ignore
 
       case ExtractorHelpers.ExSymbol("stainless", "annotation", "ignore") =>
@@ -300,10 +302,12 @@ trait CodeExtraction extends ASTExtractors {
       case EmptyTree =>
         // ignore
 
-      case t if (
-        (annotationsOf(t.symbol) contains xt.Ignore) ||
-        (t.symbol.isSynthetic && !t.symbol.isImplicit)
-      ) =>
+      case t if (annotationsOf(t.symbol) contains xt.Ignore) =>
+        val source = t.symbol.pos.source.file.file.getAbsolutePath
+        if (!(Main.libraryFiles contains source))
+          outOfSubsetError(t, s"@ignore is for internal usage only; error detected on: " + t.symbol.fullName)
+
+      case t if t.symbol.isSynthetic && !t.symbol.isImplicit =>
         // ignore
 
       case ExRequiredExpression(body) =>
