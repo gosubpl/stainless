@@ -33,11 +33,9 @@ class RegistryTestSuite extends FunSuite {
   type FunctionName = String
 
   private val DEBUG = false
-  private val testSuiteContext = if (DEBUG) {
-    val reporter = new inox.DefaultReporter(Set(frontend.DebugSectionFrontend))
-    val intrMan = inox.TestContext.empty.interruptManager
-    inox.Context(reporter, intrMan)
-  } else inox.TestContext.empty
+  private val testSuiteContext =
+    if (DEBUG) stainless.TestContext.debug(frontend.DebugSectionFrontend)
+    else stainless.TestContext.empty
 
   /** Filter functions and classes. */
   trait Filter {
