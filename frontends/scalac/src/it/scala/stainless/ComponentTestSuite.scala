@@ -20,15 +20,15 @@ trait ComponentTestSuite extends inox.TestSuite with inox.ResourceUtils with Inp
 
   // Ensure no tests share data inappropriately, but is really slow... use for debugging!!!
   private def extractOne(file: String): (String, Seq[Identifier], Program { val trees: component.trees.type }) = {
-    val reporter = new inox.TestSilentReporter
+    val ctx = stainless.TestContext.empty
+    import ctx.reporter
 
-    val ctx = inox.Context(reporter, new inox.utils.InterruptManager(reporter))
     val (structure, program) = loadFiles(ctx, Seq(file))
     program.symbols.ensureWellFormed
     val exProgram = component.extract(program, ctx)
     exProgram.symbols.ensureWellFormed
 
-    assert(reporter.lastErrors.isEmpty)
+    assert(reporter.errorCount == 0)
 
     assert((structure count { _.isMain }) == 1, "Expecting only one main unit")
     val uOpt = structure find { _.isMain }
@@ -51,15 +51,16 @@ trait ComponentTestSuite extends inox.TestSuite with inox.ResourceUtils with Inp
 
   // More efficient, but might mix tests together...
   private def extractAll(files: Seq[String]): (Seq[(String, Seq[Identifier])], Program { val trees: component.trees.type }) = {
-    val reporter = new inox.TestSilentReporter
+    val ctx = stainless.TestContext.empty
+    import ctx.reporter
 
-    val ctx = inox.Context(reporter, new inox.utils.InterruptManager(reporter))
     val (structure, program) = loadFiles(ctx, files)
     program.symbols.ensureWellFormed
     val exProgram = component.extract(program, ctx)
     exProgram.symbols.ensureWellFormed
 
-    assert(reporter.lastErrors.isEmpty)
+    assert(reporter.errorCount == 0)
+
     (for (u <- structure if u.isMain) yield {
       val unitFuns = u.allFunctions(program.symbols)
       val allFuns = inox.utils.fixpoint { (funs: Set[Identifier]) =>
